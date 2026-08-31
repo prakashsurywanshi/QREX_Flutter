@@ -1,0 +1,60 @@
+name: qrex_mobile
+description: "QREX - Qodeigence Infocircle Private Limited mobile app for the Real Estate CRM."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  hooks_riverpod: ^2.6.1
+  flutter_hooks: ^0.20.5
+
+  # Networking
+  dio: ^5.7.0
+
+  # Secure storage for the auth token
+  flutter_secure_storage: ^9.2.2
+
+  # Routing with role-aware redirects
+  go_router: ^14.6.2
+
+  # Formatting (currency ₹, dates)
+  intl: ^0.19.0
+
+  # Charts (dashboard mirroring Recharts web widgets)
+  fl_chart: ^0.69.0
+
+  # File/image pickers for uploads
+  image_picker: ^1.1.2
+  file_picker: ^8.1.4
+
+  # Local caching (optional/offline lists)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Permission handling (media access etc.)
+  permission_handler: ^11.3.1
+
+  # Loading indicators / utils
+  cached_network_image: ^3.4.1
+
+  # Downloads directory for report exports
+  path_provider: ^2.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
