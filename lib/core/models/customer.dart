@@ -35,6 +35,7 @@ class Customer {
 
   factory Customer.fromJson(Map<String, dynamic> json) {
     final tv = json['total_value'];
+    final props = json['properties'];
     return Customer(
       id: json['id'],
       customerId: json['customer_id'] ?? '',
@@ -45,7 +46,7 @@ class Customer {
       status: json['status'] ?? 'Prospect',
       city: json['city'],
       requirements: json['requirements'],
-      propertyCount: json['properties'],
+      propertyCount: props is List ? props.length : null,
       totalValue: tv == null ? null : parseDouble(tv),
       agentId: json['agent_id'],
       agentName: json['agent_name'],

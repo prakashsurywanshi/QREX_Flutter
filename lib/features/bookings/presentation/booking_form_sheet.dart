@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/formatters.dart';
 import '../../../widgets/form_fields.dart';
 import 'bookings_controller.dart';
 
@@ -43,8 +44,7 @@ class _BookingFormSheetState extends ConsumerState<BookingFormSheet> {
       lastDate: DateTime(now.year + 5),
     );
     if (d != null) {
-      _date.text =
-          '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      _date.text = Formatters.displayFromDateTime(d);
     }
   }
 
@@ -59,7 +59,7 @@ class _BookingFormSheetState extends ConsumerState<BookingFormSheet> {
         'customer_name': _customer.text.trim(),
         'property_name': _property.text.trim(),
         'agent_name': _agent.text.trim(),
-        'booking_date': _date.text.trim(),
+        'booking_date': Formatters.toIsoDate(_date.text.trim()),
         'deal_value': num.tryParse(_dealValue.text.trim())?.toDouble() ?? 0,
         'booking_amount':
             num.tryParse(_bookingAmount.text.trim())?.toDouble() ?? 0,
@@ -67,19 +67,23 @@ class _BookingFormSheetState extends ConsumerState<BookingFormSheet> {
       widget.onSaved();
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: const Text('Booking created.'),
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: const Text('Booking created.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       if (mounted) navigator.pop();
     } catch (e) {
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: errorColor,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: errorColor,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -97,49 +101,72 @@ class _BookingFormSheetState extends ConsumerState<BookingFormSheet> {
           controller: scrollController,
           padding: const EdgeInsets.all(16),
           children: [
-            Text('New Booking',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text('New Booking', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             AppTextField(
-                label: 'Customer Name *', controller: _customer,
-                icon: Icons.person_outline,
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'Customer name is required'
-                    : null),
+              label: 'Customer Name *',
+              controller: _customer,
+              icon: Icons.person_outline,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'Customer name is required'
+                  : null,
+            ),
             AppTextField(
-                label: 'Property Name *', controller: _property,
-                icon: Icons.apartment,
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'Property name is required'
-                    : null),
+              label: 'Property Name *',
+              controller: _property,
+              icon: Icons.apartment,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'Property name is required'
+                  : null,
+            ),
             AppTextField(
-                label: 'Agent Name *', controller: _agent,
-                icon: Icons.badge_outlined,
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'Agent name is required'
-                    : null),
+              label: 'Agent Name *',
+              controller: _agent,
+              icon: Icons.badge_outlined,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'Agent name is required'
+                  : null,
+            ),
             AppTextField(
-                label: 'Booking Date *', controller: _date,
-                icon: Icons.calendar_today,
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'Booking date is required'
-                    : null,
-                onTap: _pickDate,
-                readOnly: true),
-            AppTextField(
-                label: 'Deal Value (₹) *', controller: _dealValue,
-                icon: Icons.currency_rupee, keyboardType: TextInputType.number,
-                validator: (v) =>
-                    num.tryParse((v ?? '').trim()) == null
-                        ? 'Enter a valid amount'
-                        : null),
-            AppTextField(
-                label: 'Booking Amount (₹) *', controller: _bookingAmount,
-                icon: Icons.currency_rupee, keyboardType: TextInputType.number,
-                validator: (v) =>
-                    num.tryParse((v ?? '').trim()) == null
-                        ? 'Enter a valid amount'
-                        : null),
+              label: 'Booking Date *',
+              controller: _date,
+              icon: Icons.calendar_today,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'Booking date is required'
+                  : null,
+              onTap: _pickDate,
+              readOnly: true,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppTextField(
+                  label: 'Deal Value (₹) *',
+                  controller: _dealValue,
+                  icon: Icons.currency_rupee,
+                  keyboardType: TextInputType.number,
+                  validator: (v) => num.tryParse((v ?? '').trim()) == null
+                      ? 'Enter a valid amount'
+                      : null,
+                ),
+                AmountInWordsHint(controller: _dealValue),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppTextField(
+                  label: 'Booking Amount (₹) *',
+                  controller: _bookingAmount,
+                  icon: Icons.currency_rupee,
+                  keyboardType: TextInputType.number,
+                  validator: (v) => num.tryParse((v ?? '').trim()) == null
+                      ? 'Enter a valid amount'
+                      : null,
+                ),
+                AmountInWordsHint(controller: _bookingAmount),
+              ],
+            ),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: _saving ? null : _save,
@@ -147,7 +174,8 @@ class _BookingFormSheetState extends ConsumerState<BookingFormSheet> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Text('Create Booking'),
             ),
           ],

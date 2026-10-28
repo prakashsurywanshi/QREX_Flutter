@@ -5,7 +5,7 @@ class AppConfig {
   /// For local dev, point to your machine's Laravel `php artisan serve` URL.
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8000',
+    defaultValue: 'https://qrex.qodeigence.com',
   );
 
   static const String appName = 'QREX';
@@ -15,4 +15,7 @@ class AppConfig {
   static const String apiPrefix = '/api';
 
   static String get fullApiBase => '$apiBaseUrl$apiPrefix';
+
+  /// Base URL for public property pages (shareable website links).
+  static String get propertyBaseUrl => '$apiBaseUrl/properties';
 }

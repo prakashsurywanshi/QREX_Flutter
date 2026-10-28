@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/lead.dart';
 import '../../../core/models/task_item.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../widgets/form_fields.dart';
 import 'tasks_controller.dart';
 
@@ -47,7 +48,11 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     final t = widget.initial;
     _title = TextEditingController(text: t?.title ?? '');
     _description = TextEditingController(text: t?.description ?? '');
-    _dueDate = TextEditingController(text: t?.dueDate ?? '');
+    _dueDate = TextEditingController(
+      text: t == null || t.dueDate == null || t.dueDate!.isEmpty
+          ? ''
+          : Formatters.date(t.dueDate),
+    );
     _type = t == null || t.type.isEmpty ? null : t.type;
     _priority = t == null || t.priority.isEmpty ? 'Medium' : t.priority;
     _status = t?.status;
@@ -71,7 +76,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       firstDate: now.subtract(const Duration(days: 7)),
       lastDate: now.add(const Duration(days: 365 * 2)),
     );
-    if (d != null) _dueDate.text = d.toIso8601String().substring(0, 10);
+    if (d != null) _dueDate.text = Formatters.displayFromDateTime(d);
   }
 
   Future<void> _save() async {
@@ -83,7 +88,8 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       if (_type != null) 'type': _type,
       if (_priority != null) 'priority': _priority,
       if (_status != null) 'status': _status,
-      if (_dueDate.text.trim().isNotEmpty) 'due_date': _dueDate.text.trim(),
+      if (_dueDate.text.trim().isNotEmpty)
+        'due_date': Formatters.toIsoDate(_dueDate.text.trim()),
       if (_assigneeId != null) 'assigned_to_id': _assigneeId,
       if (_leadId != null) 'lead_id': _leadId,
       if (_description.text.trim().isNotEmpty)
@@ -102,19 +108,23 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       widget.onSaved();
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(isEdit ? 'Task updated.' : 'Task created.'),
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(isEdit ? 'Task updated.' : 'Task created.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -145,35 +155,46 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             if (widget.initial != null)
-              Text(widget.initial!.taskId,
-                  style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                widget.initial!.taskId,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             const SizedBox(height: 16),
             AppTextField(
-                label: 'Title *', controller: _title,
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'Title is required'
-                    : null),
+              label: 'Title *',
+              controller: _title,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Title is required' : null,
+            ),
             AppDropdownField<String>(
-                label: 'Type', value: _type,
-                options: [for (final s in types) (s, s)],
-                onChanged: (v) => setState(() => _type = v)),
+              label: 'Type',
+              value: _type,
+              options: [for (final s in types) (s, s)],
+              onChanged: (v) => setState(() => _type = v),
+            ),
             AppDropdownField<String>(
-                label: 'Priority', value: _priority,
-                options: [for (final s in priorities) (s, s)],
-                onChanged: (v) => setState(() => _priority = v)),
+              label: 'Priority',
+              value: _priority,
+              options: [for (final s in priorities) (s, s)],
+              onChanged: (v) => setState(() => _priority = v),
+            ),
             if (widget.initial != null)
               AppDropdownField<String>(
-                  label: 'Status', value: _status,
-                  options: const [
-                    ('Pending', 'Pending'),
-                    ('In Progress', 'In Progress'),
-                    ('Overdue', 'Overdue'),
-                    ('Completed', 'Completed'),
-                  ],
-                  onChanged: (v) => setState(() => _status = v)),
+                label: 'Status',
+                value: _status,
+                options: const [
+                  ('Pending', 'Pending'),
+                  ('In Progress', 'In Progress'),
+                  ('Overdue', 'Overdue'),
+                  ('Completed', 'Completed'),
+                ],
+                onChanged: (v) => setState(() => _status = v),
+              ),
             AppTextField(
-                label: 'Due date', controller: _dueDate,
-                hint: 'YYYY-MM-DD'),
+              label: 'Due date',
+              controller: _dueDate,
+              hint: 'DD/MM/YYYY',
+            ),
             TextButton.icon(
               onPressed: _pickDueDate,
               icon: const Icon(Icons.calendar_today, size: 16),
@@ -181,17 +202,23 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
             ),
             if (widget.agents.isNotEmpty)
               AppDropdownField<int>(
-                  label: 'Assignee', value: _assigneeId,
-                  options: [for (final a in widget.agents) (a.id, a.name)],
-                  onChanged: (v) => setState(() => _assigneeId = v)),
+                label: 'Assignee',
+                value: _assigneeId,
+                options: [for (final a in widget.agents) (a.id, a.name)],
+                onChanged: (v) => setState(() => _assigneeId = v),
+              ),
             if (widget.leads.isNotEmpty)
               AppDropdownField<int>(
-                  label: 'Lead', value: _leadId,
-                  options: [for (final l in widget.leads) (l.id, l.name)],
-                  onChanged: (v) => setState(() => _leadId = v)),
+                label: 'Lead',
+                value: _leadId,
+                options: [for (final l in widget.leads) (l.id, l.name)],
+                onChanged: (v) => setState(() => _leadId = v),
+              ),
             AppTextField(
-                label: 'Description', controller: _description,
-                multiline: true),
+              label: 'Description',
+              controller: _description,
+              multiline: true,
+            ),
             const SizedBox(height: 8),
             FilledButton(
               onPressed: _saving ? null : _save,
@@ -201,7 +228,8 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     ? const SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2))
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Text('Save'),
               ),
             ),

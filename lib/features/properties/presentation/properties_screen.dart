@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/models/property.dart';
 import '../../../core/notifiers/paged_state.dart';
 import '../../../core/providers/auth_providers.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../widgets/empty_state.dart';
+import '../../../widgets/feedback.dart';
 import '../../../widgets/filter_sheet.dart';
 import '../../../widgets/pagination_bar.dart';
 import '../../../widgets/status_pill.dart';
@@ -67,8 +70,10 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Center(
-                child: Text('${state.total}',
-                    style: Theme.of(context).textTheme.titleMedium),
+                child: Text(
+                  '${state.total}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
             ),
         ],
@@ -100,7 +105,8 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
                         },
                       ),
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 isDense: true,
               ),
             ),
@@ -117,9 +123,12 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
                     final opts = [
                       for (final s in ['All', ...lookups.statuses]) (s, s),
                     ];
-                    final v = await showFilterSheet(context,
-                        title: 'Filter by Status', options: opts,
-                        current: state.filters['status'] ?? 'All');
+                    final v = await showFilterSheet(
+                      context,
+                      title: 'Filter by Status',
+                      options: opts,
+                      current: state.filters['status'] ?? 'All',
+                    );
                     if (v != null) controller.setFilter('status', v);
                   },
                 ),
@@ -130,9 +139,12 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
                     final opts = [
                       for (final t in ['All', ...lookups.types]) (t, t),
                     ];
-                    final v = await showFilterSheet(context,
-                        title: 'Filter by Type', options: opts,
-                        current: state.filters['type'] ?? 'All');
+                    final v = await showFilterSheet(
+                      context,
+                      title: 'Filter by Type',
+                      options: opts,
+                      current: state.filters['type'] ?? 'All',
+                    );
                     if (v != null) controller.setFilter('type', v);
                   },
                 ),
@@ -145,24 +157,39 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
                       ('Featured', 'Featured'),
                       ('Regular', 'Regular'),
                     ];
-                    final v = await showFilterSheet(context,
-                        title: 'Featured only', options: opts,
-                        current: state.filters['featured'] ?? 'All');
+                    final v = await showFilterSheet(
+                      context,
+                      title: 'Featured only',
+                      options: opts,
+                      current: state.filters['featured'] ?? 'All',
+                    );
                     if (v != null) controller.setFilter('featured', v);
                   },
                 ),
               ],
             ),
           ),
-          Expanded(child: _buildList(context, state, controller, can?.canEdit('properties') == true, can?.canDelete('properties') == true)),
+          Expanded(
+            child: _buildList(
+              context,
+              state,
+              controller,
+              can?.canEdit('properties') == true,
+              can?.canDelete('properties') == true,
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildList(
-      BuildContext context, PagedState<Property> state,
-      PropertiesController controller, bool canEdit, bool canDelete) {
+    BuildContext context,
+    PagedState<Property> state,
+    PropertiesController controller,
+    bool canEdit,
+    bool canDelete,
+  ) {
     if (state.loading && state.items.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -171,7 +198,9 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
         icon: Icons.cloud_off,
         message: state.error!,
         action: FilledButton(
-            onPressed: controller.refresh, child: const Text('Retry')),
+          onPressed: controller.refresh,
+          child: const Text('Retry'),
+        ),
       );
     }
     if (state.items.isEmpty) {
@@ -183,7 +212,9 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
     }
 
     return RefreshIndicator(
-      onRefresh: () async { controller.refresh(); },
+      onRefresh: () async {
+        controller.refresh();
+      },
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 88),
         itemCount: state.items.length + 1,
@@ -200,13 +231,16 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
               currentPage: state.currentPage,
               lastPage: state.lastPage,
               total: state.total,
-              onPage: (p) { _loadPage(p); },
+              onPage: (p) {
+                _loadPage(p);
+              },
             );
           }
           final p = state.items[i];
           return _PropertyTile(
             property: p,
             onTap: () => _openDetail(context, p, canEdit, canDelete),
+            onShare: () => _shareProperty(context, p),
           );
         },
       ),
@@ -214,17 +248,39 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
   }
 
   Future<void> _loadPage(int page) async {
-    await ref
-        .read(propertiesControllerProvider.notifier)
-        .loadPage(page);
+    await ref.read(propertiesControllerProvider.notifier).loadPage(page);
   }
 
   Future<void> _openDetail(
-      BuildContext context, Property p, bool canEdit, bool canDelete) async {
+    BuildContext context,
+    Property p,
+    bool canEdit,
+    bool canDelete,
+  ) async {
     await context.push(
       '/properties/${p.id}',
-      extra: PropertyDetailArgs(property: p, canEdit: canEdit, canDelete: canDelete),
+      extra: PropertyDetailArgs(
+        property: p,
+        canEdit: canEdit,
+        canDelete: canDelete,
+      ),
     );
+  }
+
+  Future<void> _shareProperty(BuildContext context, Property p) async {
+    if (p.publicId.isEmpty) {
+      showToast(context, 'Property link unavailable. Please update the app.',
+          isError: true);
+      return;
+    }
+    final url = '${AppConfig.propertyBaseUrl}/${p.publicId}';
+    try {
+      await Share.share('${p.shareSummary}\n$url', subject: p.title);
+    } catch (_) {
+      if (context.mounted) {
+        showToast(context, 'Unable to share.', isError: true);
+      }
+    }
   }
 
   Future<void> _openForm(BuildContext context) async {
@@ -238,9 +294,8 @@ class _PropertiesScreenState extends ConsumerState<PropertiesScreen> {
       useSafeArea: true,
       showDragHandle: true,
       builder: (_) => PropertyFormSheet(
-        onSaved: () => ref
-            .read(propertiesControllerProvider.notifier)
-            .refresh(),
+        onSaved: () =>
+            ref.read(propertiesControllerProvider.notifier).refresh(),
       ),
     );
   }
@@ -265,11 +320,17 @@ class _FilterChip extends StatelessWidget {
 class _PropertyTile extends StatelessWidget {
   final Property property;
   final VoidCallback onTap;
-  const _PropertyTile({required this.property, required this.onTap});
+  final VoidCallback onShare;
+  const _PropertyTile({
+    required this.property,
+    required this.onTap,
+    required this.onShare,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final coverUrl = property.coverImageUrl;
     return Card(
       elevation: 0,
       color: theme.colorScheme.surfaceContainerLow,
@@ -284,16 +345,18 @@ class _PropertyTile extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: property.image == null || property.image!.isEmpty
+                child: coverUrl == null || coverUrl.isEmpty
                     ? Container(
                         width: 64,
                         height: 64,
                         color: theme.colorScheme.surfaceContainerHighest,
-                        child: Icon(Icons.apartment,
-                            color: theme.colorScheme.onSurfaceVariant),
+                        child: Icon(
+                          Icons.apartment,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       )
                     : Image.network(
-                        property.image!,
+                        coverUrl,
                         width: 64,
                         height: 64,
                         fit: BoxFit.cover,
@@ -301,8 +364,10 @@ class _PropertyTile extends StatelessWidget {
                           width: 64,
                           height: 64,
                           color: theme.colorScheme.surfaceContainerHighest,
-                          child: Icon(Icons.image_not_supported,
-                              color: theme.colorScheme.onSurfaceVariant),
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
               ),
@@ -318,20 +383,40 @@ class _PropertyTile extends StatelessWidget {
                             property.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.w600),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: onShare,
+                          icon: Icon(
+                            Icons.share_outlined,
+                            size: 18,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          tooltip: 'Share',
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
                           ),
                         ),
                         if (property.featured)
-                          const Icon(Icons.star,
-                              size: 16, color: Color(0xFFF9A825)),
+                          const Icon(
+                            Icons.star,
+                            size: 16,
+                            color: Color(0xFFF9A825),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 2),
                     Text(
                       property.subtitleBits,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Row(
@@ -341,8 +426,9 @@ class _PropertyTile extends StatelessWidget {
                             property.priceLabel ??
                                 Formatters.inrLabel(property.price),
                             style: theme.textTheme.titleSmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold),
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         StatusPill(label: property.status),
@@ -352,8 +438,9 @@ class _PropertyTile extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         '${property.propertyId} · ${property.city}',
-                        style: theme.textTheme.labelSmall
-                            ?.copyWith(color: theme.colorScheme.outline),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                        ),
                       ),
                     ],
                   ],

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/providers/auth_providers.dart';
+import 'core/theme/theme_provider.dart';
 
 void main() {
   runApp(const ProviderScope(child: QrexApp()));
@@ -22,6 +23,7 @@ class _SessionBootstrapState extends ConsumerState<SessionBootstrap> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      restoreTheme(ref);
       ref.read(authControllerProvider.notifier).restoreSession();
     });
   }

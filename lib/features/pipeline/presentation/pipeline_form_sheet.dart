@@ -45,7 +45,8 @@ class _PipelineFormSheetState extends ConsumerState<PipelineFormSheet> {
     final d = widget.initial;
     _customerName = TextEditingController(text: d?.customerName ?? '');
     _value = TextEditingController(
-        text: d == null || d.dealValue == 0 ? '' : d.dealValue.toString());
+      text: d == null || d.dealValue == 0 ? '' : d.dealValue.toString(),
+    );
     _stage = d?.stage.isEmpty == false ? d!.stage : (widget.stages.firstOrNull);
     _probability = d == null || d.probability == 0 ? null : d.probability;
     _propertyId = d?.propertyId;
@@ -84,19 +85,23 @@ class _PipelineFormSheetState extends ConsumerState<PipelineFormSheet> {
       widget.onSaved();
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(isEdit ? 'Deal updated.' : 'Deal created.'),
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(isEdit ? 'Deal updated.' : 'Deal created.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -124,8 +129,10 @@ class _PipelineFormSheetState extends ConsumerState<PipelineFormSheet> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             if (widget.initial != null)
-              Text(widget.initial!.dealId,
-                  style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                widget.initial!.dealId,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             const SizedBox(height: 16),
             AppTextField(
               label: 'Customer name *',
@@ -134,21 +141,25 @@ class _PipelineFormSheetState extends ConsumerState<PipelineFormSheet> {
                   ? 'Customer name is required'
                   : null,
             ),
-            AppTextField(
-              label: 'Deal value (₹) *',
-              controller: _value,
-              keyboardType: TextInputType.number,
-              validator: (v) => num.tryParse((v ?? '').trim()) == null
-                  ? 'Enter a valid amount'
-                  : null,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppTextField(
+                  label: 'Deal value (₹) *',
+                  controller: _value,
+                  keyboardType: TextInputType.number,
+                  validator: (v) => num.tryParse((v ?? '').trim()) == null
+                      ? 'Enter a valid amount'
+                      : null,
+                ),
+                AmountInWordsHint(controller: _value),
+              ],
             ),
             if (widget.properties.isNotEmpty)
               AppDropdownField<int>(
                 label: 'Property',
                 value: _propertyId,
-                options: [
-                  for (final p in widget.properties) (p.id, p.name),
-                ],
+                options: [for (final p in widget.properties) (p.id, p.name)],
                 onChanged: (v) => setState(() => _propertyId = v),
               ),
             AppDropdownField<String>(
@@ -182,7 +193,8 @@ class _PipelineFormSheetState extends ConsumerState<PipelineFormSheet> {
                     ? const SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2))
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Text('Save'),
               ),
             ),

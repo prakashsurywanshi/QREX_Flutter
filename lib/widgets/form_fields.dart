@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../core/utils/formatters.dart';
+
 /// Labeled text field used across CRM form sheets.
 class AppTextField extends StatelessWidget {
   final String label;
@@ -15,6 +17,8 @@ class AppTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final bool readOnly;
   final bool obscureText;
+  final ValueChanged<String>? onSubmitted;
+  final TextInputAction? textInputAction;
 
   const AppTextField({
     super.key,
@@ -30,6 +34,8 @@ class AppTextField extends StatelessWidget {
     this.onTap,
     this.readOnly = false,
     this.obscureText = false,
+    this.onSubmitted,
+    this.textInputAction,
   });
 
   @override
@@ -41,8 +47,10 @@ class AppTextField extends StatelessWidget {
         enabled: enabled,
         readOnly: readOnly,
         onTap: onTap,
+        onFieldSubmitted: onSubmitted,
         maxLines: multiline ? 4 : maxLines,
         keyboardType: keyboardType,
+        textInputAction: textInputAction,
         obscureText: obscureText,
         decoration: InputDecoration(
           labelText: label,
@@ -56,6 +64,35 @@ class AppTextField extends StatelessWidget {
             : null,
         validator: validator,
       ),
+    );
+  }
+}
+
+/// Live "Amount in words" hint shown under a money field.
+class AmountInWordsHint extends StatelessWidget {
+  final TextEditingController controller;
+
+  const AmountInWordsHint({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, _) {
+        final words = Formatters.amountInWords(value.text);
+        if (words.isEmpty) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            'Amount in words: $words',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -119,10 +156,9 @@ class FormSection extends StatelessWidget {
       padding: const EdgeInsets.only(top: 6, bottom: 10),
       child: Text(
         title,
-        style: Theme.of(context)
-            .textTheme
-            .titleSmall
-            ?.copyWith(color: Theme.of(context).colorScheme.primary),
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }

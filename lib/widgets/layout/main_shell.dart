@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -182,6 +183,8 @@ class MainShell extends ConsumerStatefulWidget {
 }
 
 class _MainShellState extends ConsumerState<MainShell> {
+  DateTime? _lastBackPressed;
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
@@ -238,27 +241,48 @@ class _MainShellState extends ConsumerState<MainShell> {
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          destinations.isEmpty ? 'QREX' : destinations[selectedIndex].label,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        final now = DateTime.now();
+        if (_lastBackPressed == null ||
+            now.difference(_lastBackPressed!) > const Duration(seconds: 2)) {
+          _lastBackPressed = now;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Press again to exit'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+
+        SystemNavigator.pop();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            destinations.isEmpty ? 'QREX' : destinations[selectedIndex].label,
+          ),
+          leading: destinations.isNotEmpty
+              ? Builder(
+                  builder: (ctx) => IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => Scaffold.of(ctx).openDrawer(),
+                  ),
+                )
+              : null,
+          actions: [
+            _NotificationBell(user: user),
+            _ProfileAvatar(user: user),
+            const SizedBox(width: 8),
+          ],
         ),
-        leading: destinations.isNotEmpty
-            ? Builder(
-                builder: (ctx) => IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () => Scaffold.of(ctx).openDrawer(),
-                ),
-              )
-            : null,
-        actions: [
-          _NotificationBell(user: user),
-          _ProfileAvatar(user: user),
-          const SizedBox(width: 8),
-        ],
+        drawer: destinations.isNotEmpty ? drawer : null,
+        body: widget.child,
       ),
-      drawer: destinations.isNotEmpty ? drawer : null,
-      body: widget.child,
     );
   }
 

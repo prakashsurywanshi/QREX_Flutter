@@ -47,19 +47,23 @@ class _PaymentFormSheetState extends ConsumerState<PaymentFormSheet> {
       widget.onSaved();
       messenger
         ..clearSnackBars()
-        ..showSnackBar(const SnackBar(
-          content: Text('Payment recorded.'),
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Payment recorded.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       if (mounted) navigator.pop();
     } catch (e) {
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: errorColor,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: errorColor,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -77,40 +81,62 @@ class _PaymentFormSheetState extends ConsumerState<PaymentFormSheet> {
           controller: scrollController,
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Record Payment', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Record Payment',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 16),
             AppTextField(
-                label: 'Customer Name *', controller: _customer,
-                icon: Icons.person_outline,
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'Customer name is required'
-                    : null),
+              label: 'Customer Name *',
+              controller: _customer,
+              icon: Icons.person_outline,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'Customer name is required'
+                  : null,
+            ),
             AppTextField(
-                label: 'Property Name *', controller: _property,
-                icon: Icons.apartment,
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'Property name is required'
-                    : null),
-            AppTextField(
-                label: 'Amount (₹) *', controller: _amount,
-                icon: Icons.currency_rupee, keyboardType: TextInputType.number,
-                validator: (v) =>
-                    num.tryParse((v ?? '').trim()) == null
-                        ? 'Enter a valid amount'
-                        : null),
+              label: 'Property Name *',
+              controller: _property,
+              icon: Icons.apartment,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'Property name is required'
+                  : null,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppTextField(
+                  label: 'Amount (₹) *',
+                  controller: _amount,
+                  icon: Icons.currency_rupee,
+                  keyboardType: TextInputType.number,
+                  validator: (v) => num.tryParse((v ?? '').trim()) == null
+                      ? 'Enter a valid amount'
+                      : null,
+                ),
+                AmountInWordsHint(controller: _amount),
+              ],
+            ),
             AppDropdownField<String>(
-                label: 'Mode', value: _mode,
-                options: [
-                  for (final m in paymentModes) (m, m),
-                ],
-                onChanged: (v) => setState(() => _mode = v)),
+              label: 'Mode',
+              value: _mode,
+              options: [for (final m in paymentModes) (m, m)],
+              onChanged: (v) => setState(() => _mode = v),
+            ),
             AppDropdownField<String>(
-                label: 'Status', value: _status,
-                options: [
-                  for (final s in ['Pending', 'Partially Paid', 'Paid', 'Overdue'])
-                    (s, s),
-                ],
-                onChanged: (v) => setState(() => _status = v)),
+              label: 'Status',
+              value: _status,
+              options: [
+                for (final s in [
+                  'Pending',
+                  'Partially Paid',
+                  'Paid',
+                  'Overdue',
+                ])
+                  (s, s),
+              ],
+              onChanged: (v) => setState(() => _status = v),
+            ),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: _saving ? null : _save,
@@ -118,7 +144,8 @@ class _PaymentFormSheetState extends ConsumerState<PaymentFormSheet> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Text('Record Payment'),
             ),
           ],

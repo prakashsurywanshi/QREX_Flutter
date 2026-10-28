@@ -1,7 +1,9 @@
 import '../utils/num_parsers.dart';
+import 'property_image.dart';
 
 class Property {
   final int id;
+  final String publicId;
   final String propertyId;
   final String title;
   final String type;
@@ -26,11 +28,13 @@ class Property {
   final bool isWebsiteVisible;
   final String? description;
   final String? image;
+  final List<PropertyImage> images;
   final int? agentId;
   final String? agentName;
 
   const Property({
     required this.id,
+    this.publicId = '',
     this.propertyId = '',
     required this.title,
     this.type = '',
@@ -55,6 +59,7 @@ class Property {
     this.isWebsiteVisible = false,
     this.description,
     this.image,
+    this.images = const [],
     this.agentId,
     this.agentName,
   });
@@ -62,6 +67,7 @@ class Property {
   factory Property.fromJson(Map<String, dynamic> json) {
     return Property(
       id: json['id'],
+      publicId: json['public_id'] ?? '',
       propertyId: json['property_id'] ?? '',
       title: json['title'] ?? '',
       type: json['type'] ?? '',
@@ -88,6 +94,10 @@ class Property {
       isWebsiteVisible: json['is_website_visible'] ?? false,
       description: json['description'],
       image: json['image'],
+      images: (json['images'] as List<dynamic>? ?? [])
+          .whereType<Map>()
+          .map((e) => PropertyImage.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
       agentId: json['agent_id'],
       agentName: json['agent_name'],
     );
@@ -100,5 +110,36 @@ class Property {
       if (area > 0) '$area sq.ft',
     ];
     return parts.join(' · ');
+  }
+
+  /// Multi-line summary used when sharing a property (mirrors the web share text).
+  String get shareSummary {
+    final details = <String>[
+      if (bedrooms > 0) '$bedrooms BHK',
+      if (area > 0) '${area.toStringAsFixed(0)} sq.ft',
+      if ((priceLabel ?? '').isNotEmpty) priceLabel!,
+      if ((city ?? '').isNotEmpty) city!,
+    ].join(' · ');
+    final head = '$title — $transactionType $type';
+    return details.isEmpty ? head : '$head\n$details';
+  }
+
+  String? get coverImageUrl {
+    if (images.isNotEmpty) {
+      final cover = images.firstWhere(
+        (i) => i.isCover,
+        orElse: () => images.first,
+      );
+      if (cover.path.isNotEmpty) return cover.path;
+    }
+    return null;
+  }
+
+  List<String> get imageUrls {
+    final urls = <String>[
+      for (final i in images)
+        if (i.path.isNotEmpty) i.path,
+    ];
+    return urls.toSet().toList();
   }
 }

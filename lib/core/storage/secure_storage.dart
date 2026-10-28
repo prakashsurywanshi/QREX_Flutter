@@ -17,6 +17,7 @@ class SecureStorage {
 
   static const _tokenKey = 'auth_token';
   static const _userKey = 'auth_user';
+  static const _themeKey = 'app_theme_mode';
 
   /// Upper bound for any single native secure-storage operation.
   static const _timeout = Duration(seconds: 2);
@@ -40,4 +41,12 @@ class SecureStorage {
     await _storage.delete(key: _tokenKey).timeout(_timeout);
     await _storage.delete(key: _userKey).timeout(_timeout);
   }
+
+  // ── Theme persistence ───────────────────────────────────────────────
+
+  static Future<void> saveThemeMode(String mode) =>
+      _storage.write(key: _themeKey, value: mode).timeout(_timeout);
+
+  static Future<String?> getThemeMode() =>
+      _storage.read(key: _themeKey).timeout(_timeout);
 }

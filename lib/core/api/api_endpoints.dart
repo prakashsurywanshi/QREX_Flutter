@@ -22,6 +22,11 @@ class ApiEndpoints {
   // ── Properties ────────────────────────────────────────────────────────────
   static const String properties = '/properties';
   static String property(int id) => '/properties/$id';
+  static String propertyImages(int id) => '/properties/$id/images';
+  static String propertyImage(int propertyId, int imageId) =>
+      '/properties/$propertyId/images/$imageId';
+  static String propertyCover(int propertyId, int imageId) =>
+      '/properties/$propertyId/images/$imageId/cover';
   static const String propertyAgents = '/properties/agents';
 
   // ── Leads ─────────────────────────────────────────────────────────────────

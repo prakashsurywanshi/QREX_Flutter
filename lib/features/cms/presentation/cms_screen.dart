@@ -42,117 +42,127 @@ class _CmsScreenState extends ConsumerState<CmsScreen> {
         title: const Text('CMS / Website'),
         actions: [
           IconButton(
-              tooltip: 'Refresh',
-              icon: const Icon(Icons.refresh),
-              onPressed: controller.load),
+            tooltip: 'Refresh',
+            icon: const Icon(Icons.refresh),
+            onPressed: controller.load,
+          ),
         ],
       ),
       body: state.loading && state.sections.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : state.error != null && state.sections.isEmpty
-              ? EmptyState(
-                  icon: Icons.cloud_off,
-                  message: state.error!,
-                  action: FilledButton(
-                      onPressed: controller.load, child: const Text('Retry')),
-                )
-              : RefreshIndicator(
-                  onRefresh: controller.load,
-                  child: ListView(
-                    padding: const EdgeInsets.all(12),
-                    children: [
-                      SectionCard(
-                        title: 'Homepage Sections',
-                        child: Column(
-                          children: [
-                            for (final s in state.sections)
-                              _SectionRow(
-                                section: s,
-                                enabled: canEdit,
-                                onChanged: (v) =>
-                                    controller.toggleSection(s.id, v),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SectionCard(
-                        title: 'Agents Shown on Website',
-                        child: state.agents.isEmpty
-                            ? Text('No agents.',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant))
-                            : Column(
-                                children: [
-                                  for (final a in state.agents)
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.symmetric(vertical: 6),
-                                      child: Row(
-                                        children: [
-                                          InitialsAvatar(name: a.name, radius: 16),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(a.name,
-                                                    style:
-                                                        theme.textTheme.bodyMedium),
-                                                Text(a.role,
-                                                    style: theme.textTheme.labelSmall
-                                                        ?.copyWith(
-                                                            color: theme
-                                                                .colorScheme
-                                                                .outline)),
-                                              ],
-                                            ),
-                                          ),
-                                          Text(a.branch,
-                                              style: theme.textTheme.labelSmall),
-                                        ],
-                                      ),
-                                    ),
-                                ],
-                              ),
-                      ),
-                      const SizedBox(height: 12),
-                      SectionCard(
-                        title: 'Featured on Homepage',
-                        trailing: canEdit
-                            ? TextButton(
-                                onPressed: () => _openFeaturedManager(context),
-                                child: const Text('Manage'),
-                              )
-                            : null,
-                        child: state.featuredProperties.isEmpty
-                            ? const EmptyState(
-                                icon: Icons.star_outline,
-                                message: 'No featured properties',
-                                hint: 'Choose properties to feature on the homepage.',
-                              )
-                            : Column(
-                                children: [
-                                  for (final p in state.featuredProperties)
-                                    _FeaturedRow(property: p),
-                                ],
-                              ),
-                      ),
-                      const SizedBox(height: 90),
-                    ],
+          ? EmptyState(
+              icon: Icons.cloud_off,
+              message: state.error!,
+              action: FilledButton(
+                onPressed: controller.load,
+                child: const Text('Retry'),
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: controller.load,
+              child: ListView(
+                padding: const EdgeInsets.all(12),
+                children: [
+                  SectionCard(
+                    title: 'Homepage Sections',
+                    child: Column(
+                      children: [
+                        for (final s in state.sections)
+                          _SectionRow(
+                            section: s,
+                            enabled: canEdit,
+                            onChanged: (v) => controller.toggleSection(s.id, v),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 12),
+                  SectionCard(
+                    title: 'Agents Shown on Website',
+                    child: state.agents.isEmpty
+                        ? Text(
+                            'No agents.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          )
+                        : Column(
+                            children: [
+                              for (final a in state.agents)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 6,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      InitialsAvatar(name: a.name, radius: 16),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              a.name,
+                                              style: theme.textTheme.bodyMedium,
+                                            ),
+                                            Text(
+                                              a.role,
+                                              style: theme.textTheme.labelSmall
+                                                  ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .outline,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Text(
+                                        a.branch,
+                                        style: theme.textTheme.labelSmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                  ),
+                  const SizedBox(height: 12),
+                  SectionCard(
+                    title: 'Featured on Homepage',
+                    trailing: canEdit
+                        ? TextButton(
+                            onPressed: () => _openFeaturedManager(context),
+                            child: const Text('Manage'),
+                          )
+                        : null,
+                    child: state.featuredProperties.isEmpty
+                        ? const EmptyState(
+                            icon: Icons.star_outline,
+                            message: 'No featured properties',
+                            hint:
+                                'Choose properties to feature on the homepage.',
+                          )
+                        : Column(
+                            children: [
+                              for (final p in state.featuredProperties)
+                                _FeaturedRow(property: p),
+                            ],
+                          ),
+                  ),
+                  const SizedBox(height: 90),
+                ],
+              ),
+            ),
     );
   }
 
   Future<void> _openFeaturedManager(BuildContext context) async {
     final controller = ref.read(cmsControllerProvider.notifier);
     final state = ref.read(cmsControllerProvider);
-    final current = state
-        .featuredProperties
-        .map((p) => p.id)
-        .toSet();
+    final current = state.featuredProperties.map((p) => p.id).toSet();
     final selected = <int>{...current};
     final messenger = ScaffoldMessenger.of(context);
 
@@ -179,26 +189,31 @@ class _CmsScreenState extends ConsumerState<CmsScreen> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: isSel
-                      ? Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.12)
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.12)
                       : Theme.of(context).colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
-                    Icon(isSel ? Icons.star : Icons.star_border,
-                        color: isSel
-                            ? Colors.amber.shade700
-                            : Theme.of(context).colorScheme.outline),
+                    Icon(
+                      isSel ? Icons.star : Icons.star_border,
+                      color: isSel
+                          ? Colors.amber.shade700
+                          : Theme.of(context).colorScheme.outline,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Text(item.title,
-                          style: Theme.of(context).textTheme.bodyMedium),
+                      child: Text(
+                        item.title,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
-                    Text(item.priceLabel ?? '',
-                        style: Theme.of(context).textTheme.labelMedium),
+                    Text(
+                      item.priceLabel ?? '',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
                   ],
                 ),
               ),
@@ -213,11 +228,15 @@ class _CmsScreenState extends ConsumerState<CmsScreen> {
               controller: sc,
               padding: const EdgeInsets.all(16),
               children: [
-                Text('Manage Featured Properties',
-                    style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  'Manage Featured Properties',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: 4),
-                Text('${selected.length} of ${state.allProperties.length} selected',
-                    style: Theme.of(context).textTheme.labelMedium),
+                Text(
+                  '${selected.length} of ${state.allProperties.length} selected',
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
                 const SizedBox(height: 12),
                 for (final p in state.allProperties) tile(p),
                 const SizedBox(height: 12),
@@ -227,21 +246,27 @@ class _CmsScreenState extends ConsumerState<CmsScreen> {
                       await controller.setFeatured(selected.toList());
                       messenger
                         ..clearSnackBars()
-                        ..showSnackBar(const SnackBar(
-                          content: Text('Featured properties updated.'),
-                          behavior: SnackBarBehavior.floating,
-                        ));
+                        ..showSnackBar(
+                          const SnackBar(
+                            content: Text('Featured properties updated.'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
                       if (ctx.mounted) Navigator.of(ctx).pop();
                     } catch (e) {
                       messenger
                         ..clearSnackBars()
-                        ..showSnackBar(SnackBar(
-                          content: Text(e.toString()
-                              .replaceFirst('Exception: ', '')),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.error,
-                          behavior: SnackBarBehavior.floating,
-                        ));
+                        ..showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              e.toString().replaceFirst('Exception: ', ''),
+                            ),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
                     }
                   },
                   child: const Text('Save Featured'),
@@ -260,8 +285,11 @@ class _SectionRow extends StatelessWidget {
   final bool enabled;
   final ValueChanged<bool> onChanged;
 
-  const _SectionRow(
-      {required this.section, required this.enabled, required this.onChanged});
+  const _SectionRow({
+    required this.section,
+    required this.enabled,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -269,8 +297,10 @@ class _SectionRow extends StatelessWidget {
     return SwitchListTile(
       dense: true,
       contentPadding: EdgeInsets.zero,
-      title: Text('${section.icon}  ${section.label}',
-          style: theme.textTheme.bodyMedium),
+      title: Text(
+        '${section.icon}  ${section.label}',
+        style: theme.textTheme.bodyMedium,
+      ),
       value: section.visible,
       activeTrackColor: theme.colorScheme.primary,
       onChanged: enabled ? onChanged : null,
@@ -295,14 +325,20 @@ class _FeaturedRow extends StatelessWidget {
               width: 44,
               height: 36,
               color: theme.colorScheme.surfaceContainerHigh,
-              child: property.image == null
-                  ? Icon(Icons.apartment,
-                      size: 20, color: theme.colorScheme.outline)
+              child: property.coverImageUrl == null
+                  ? Icon(
+                      Icons.apartment,
+                      size: 20,
+                      color: theme.colorScheme.outline,
+                    )
                   : CachedNetworkImage(
-                      imageUrl: property.image!,
+                      imageUrl: property.coverImageUrl!,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => Icon(Icons.apartment,
-                          size: 20, color: theme.colorScheme.outline),
+                      errorWidget: (_, __, ___) => Icon(
+                        Icons.apartment,
+                        size: 20,
+                        color: theme.colorScheme.outline,
+                      ),
                     ),
             ),
           ),
@@ -311,20 +347,27 @@ class _FeaturedRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(property.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium),
-                Text(property.status,
-                    style: theme.textTheme.labelSmall
-                        ?.copyWith(color: theme.colorScheme.outline)),
+                Text(
+                  property.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                Text(
+                  property.status,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
               ],
             ),
           ),
           Icon(Icons.star, color: Colors.amber.shade700, size: 18),
           const SizedBox(width: 6),
-          Text(property.priceLabel ?? Formatters.inrLabel(property.price),
-              style: theme.textTheme.labelMedium),
+          Text(
+            property.priceLabel ?? Formatters.inrLabel(property.price),
+            style: theme.textTheme.labelMedium,
+          ),
         ],
       ),
     );

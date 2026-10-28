@@ -5,6 +5,8 @@ import '../../../core/api/api_endpoints.dart';
 import '../../../core/api/api_helper.dart';
 import '../../../core/models/paged.dart';
 import '../../../core/models/property.dart';
+import '../../../core/models/property_image.dart';
+import '../../../core/models/property_type.dart';
 import '../../../core/utils/num_parsers.dart';
 
 class PropertyIndex {
@@ -12,11 +14,23 @@ class PropertyIndex {
   final List<String> statuses;
   final List<String> types;
 
+  /// Full property-type catalog (spec rules + valid amenities per type).
+  final List<PropertyTypeMeta> typeOptions;
+
   const PropertyIndex({
     required this.paged,
     this.statuses = const [],
     this.types = const [],
+    this.typeOptions = const [],
   });
+}
+
+/// A single property plus the catalog options for its type.
+class PropertyDetail {
+  final Property property;
+  final PropertyTypeOptions typeOptions;
+
+  const PropertyDetail({required this.property, this.typeOptions = const PropertyTypeOptions()});
 }
 
 class PropertiesRepository {
@@ -38,8 +52,10 @@ class PropertiesRepository {
     });
 
     try {
-      final res = await _dio.get(ApiEndpoints.properties,
-          queryParameters: query);
+      final res = await _dio.get(
+        ApiEndpoints.properties,
+        queryParameters: query,
+      );
       final body = res.data['data'] as Map<String, dynamic>;
       final meta = body['meta'] as Map<String, dynamic>? ?? {};
 
@@ -60,18 +76,29 @@ class PropertiesRepository {
         types: (body['types'] as List<dynamic>? ?? [])
             .map((e) => e.toString())
             .toList(),
+        typeOptions: (body['type_options'] as List<dynamic>? ?? const [])
+            .whereType<Map>()
+            .map((e) => PropertyTypeMeta.fromJson(Map<String, dynamic>.from(e)))
+            .toList(),
       );
     } catch (e) {
       throw ApiHelper.toException(e, 'Unable to load properties.');
     }
   }
 
-  Future<Property> show(int id) async {
+  Future<PropertyDetail> show(int id) async {
     try {
       final res = await _dio.get(ApiEndpoints.property(id));
-      return Property.fromJson(
-          (res.data['data'] as Map<String, dynamic>)['property']
-              as Map<String, dynamic>);
+      final data = res.data['data'] as Map<String, dynamic>;
+      return PropertyDetail(
+        property: Property.fromJson(data['property'] as Map<String, dynamic>),
+        typeOptions: PropertyTypeOptions.fromJson(
+          data['type_options'] as Map<String, dynamic>? ??
+              (data['type_options'] is Map
+                  ? Map<String, dynamic>.from(data['type_options'] as Map)
+                  : null),
+        ),
+      );
     } catch (e) {
       throw ApiHelper.toException(e, 'Unable to load property.');
     }
@@ -79,11 +106,11 @@ class PropertiesRepository {
 
   Future<Property> create(Map<String, dynamic> payload) async {
     try {
-      final res = await _dio.post(ApiEndpoints.properties,
-          data: payload);
+      final res = await _dio.post(ApiEndpoints.properties, data: payload);
       final d = res.data['data'];
       return Property.fromJson(
-          d is Map ? Map<String, dynamic>.from(d) : <String, dynamic>{});
+        d is Map ? Map<String, dynamic>.from(d) : <String, dynamic>{},
+      );
     } catch (e) {
       throw ApiHelper.toException(e, 'Unable to create property.');
     }
@@ -94,7 +121,8 @@ class PropertiesRepository {
       final res = await _dio.put(ApiEndpoints.property(id), data: payload);
       final d = res.data['data'];
       return Property.fromJson(
-          d is Map ? Map<String, dynamic>.from(d) : <String, dynamic>{});
+        d is Map ? Map<String, dynamic>.from(d) : <String, dynamic>{},
+      );
     } catch (e) {
       throw ApiHelper.toException(e, 'Unable to update property.');
     }
@@ -108,11 +136,57 @@ class PropertiesRepository {
     }
   }
 
+  Future<List<PropertyImage>> uploadImages(
+    int propertyId,
+    List<String> imagePaths,
+  ) async {
+    if (imagePaths.isEmpty) return [];
+    try {
+      final form = FormData.fromMap({
+        'images[]': [
+          for (final path in imagePaths)
+            await MultipartFile.fromFile(path, filename: path.split('/').last),
+        ],
+      });
+      final res = await _dio.post(
+        ApiEndpoints.propertyImages(propertyId),
+        data: form,
+      );
+      final d = res.data['data'];
+      if (d is List) {
+        return d
+            .whereType<Map>()
+            .map((e) => PropertyImage.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      throw ApiHelper.toException(e, 'Unable to upload images.');
+    }
+  }
+
+  Future<void> deleteImage(int propertyId, int imageId) async {
+    try {
+      await _dio.delete(ApiEndpoints.propertyImage(propertyId, imageId));
+    } catch (e) {
+      throw ApiHelper.toException(e, 'Unable to delete image.');
+    }
+  }
+
+  Future<void> setCover(int propertyId, int imageId) async {
+    try {
+      await _dio.post(ApiEndpoints.propertyCover(propertyId, imageId));
+    } catch (e) {
+      throw ApiHelper.toException(e, 'Unable to set cover image.');
+    }
+  }
+
   Future<List<(int, String)>> agents() async {
     try {
       final res = await _dio.get(ApiEndpoints.propertyAgents);
-      final list = (res.data['data'] as Map<String, dynamic>)['agents']
-          as List<dynamic>?;
+      final list =
+          (res.data['data'] as Map<String, dynamic>)['agents']
+              as List<dynamic>?;
       return (list ?? [])
           .whereType<Map>()
           .map((e) => (parseInt(e['id']), e['name'].toString()))

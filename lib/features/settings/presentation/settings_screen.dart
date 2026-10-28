@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/settings.dart';
 import '../../../core/providers/auth_providers.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/form_fields.dart';
 import '../../../widgets/section_card.dart';
@@ -240,6 +241,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           padding: const EdgeInsets.all(12),
           children: [
             SectionCard(
+              title: 'Appearance',
+              child: _buildAppearanceSection(theme),
+            ),
+            const SizedBox(height: 12),
+            SectionCard(
               title: 'General Information',
               child: Column(
                 children: [
@@ -399,6 +405,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   bool _hydrated = false;
+
+  Widget _buildAppearanceSection(ThemeData theme) {
+    return RadioGroup<QrexTheme>(
+      groupValue: ref.watch(qrexThemeProvider),
+      onChanged: (v) {
+        if (v != null) selectTheme(ref, v);
+      },
+      child: Column(
+        children: QrexTheme.values.map((t) {
+          final isSelected = ref.read(qrexThemeProvider) == t;
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: CircleAvatar(
+              radius: 20,
+              backgroundColor: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.surfaceContainerHighest,
+              child: Icon(
+                t.icon,
+                color: isSelected
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            title: Text(t.label, style: theme.textTheme.bodyLarge),
+            subtitle: Text(_themeDescription(t),
+                style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant)),
+            trailing: Radio<QrexTheme>(value: t),
+            onTap: () => selectTheme(ref, t),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  String _themeDescription(QrexTheme t) {
+    switch (t) {
+      case QrexTheme.light:
+        return 'Clean white surfaces with navy and gold accents.';
+      case QrexTheme.dark:
+        return 'Premium black with elegant dark surfaces.';
+      case QrexTheme.gray:
+        return 'Soft gray surfaces for a muted, professional look.';
+    }
+  }
 
   Widget _toggleTile(ThemeData theme, String title, String subtitle, String key) {
     return SwitchListTile(

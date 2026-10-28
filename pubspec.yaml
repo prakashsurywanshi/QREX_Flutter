@@ -2,7 +2,7 @@ name: qrex_mobile
 description: "QREX - Qodeigence Infocircle Private Limited mobile app for the Real Estate CRM."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.9.2
@@ -35,7 +35,7 @@ dependencies:
 
   # File/image pickers for uploads
   image_picker: ^1.1.2
-  file_picker: ^8.1.4
+  file_picker: ^10.3.3
 
   # Local caching (optional/offline lists)
   hive: ^2.2.3
@@ -44,13 +44,22 @@ dependencies:
   # Permission handling (media access etc.)
   permission_handler: ^11.3.1
 
+  # Google Play In-App Updates (immediate + flexible)
+  in_app_update: ^5.0.0
+
   # Loading indicators / utils
   cached_network_image: ^3.4.1
 
   # Downloads directory for report exports
   path_provider: ^2.1.4
 
+  # Share property links via native share sheet
+  share_plus: ^10.1.2
+
 dev_dependencies:
+  change_app_package_name: ^1.5.0
+  flutter_launcher_icons: ^0.13.1
+
   flutter_test:
     sdk: flutter
 
@@ -58,3 +67,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"

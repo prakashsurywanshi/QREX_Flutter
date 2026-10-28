@@ -55,7 +55,13 @@ class _LeadFormSheetState extends ConsumerState<LeadFormSheet> {
   @override
   void dispose() {
     for (final c in [
-      _name, _phone, _email, _budget, _location, _requirements, _followup,
+      _name,
+      _phone,
+      _email,
+      _budget,
+      _location,
+      _requirements,
+      _followup,
     ]) {
       c.dispose();
     }
@@ -73,11 +79,15 @@ class _LeadFormSheetState extends ConsumerState<LeadFormSheet> {
       'source': _source ?? 'Website',
       'status': _status ?? 'New',
       'budget': _budget.text.trim().isEmpty ? null : _budget.text.trim(),
-      'preferred_location':
-          _location.text.trim().isEmpty ? null : _location.text.trim(),
-      'requirements':
-          _requirements.text.trim().isEmpty ? null : _requirements.text.trim(),
-      'next_followup': _followup.text.trim().isEmpty ? null : _followup.text.trim(),
+      'preferred_location': _location.text.trim().isEmpty
+          ? null
+          : _location.text.trim(),
+      'requirements': _requirements.text.trim().isEmpty
+          ? null
+          : _requirements.text.trim(),
+      'next_followup': _followup.text.trim().isEmpty
+          ? null
+          : _followup.text.trim(),
       if (_agentId != null) 'assigned_agent_id': _agentId,
     };
 
@@ -93,19 +103,23 @@ class _LeadFormSheetState extends ConsumerState<LeadFormSheet> {
       widget.onSaved();
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(isEdit ? 'Lead updated.' : 'Lead created.'),
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(isEdit ? 'Lead updated.' : 'Lead created.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -113,13 +127,8 @@ class _LeadFormSheetState extends ConsumerState<LeadFormSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final lookups = ref
-        .read(leadsControllerProvider.notifier)
-        .lookups;
-    final statuses = [
-      if (lookups.statuses.isEmpty) 'New',
-      ...lookups.statuses,
-    ];
+    final lookups = ref.read(leadsControllerProvider.notifier).lookups;
+    final statuses = [if (lookups.statuses.isEmpty) 'New', ...lookups.statuses];
     final sources = [
       if (lookups.sources.isEmpty) 'Website',
       ...lookups.sources,
@@ -141,43 +150,70 @@ class _LeadFormSheetState extends ConsumerState<LeadFormSheet> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             if (widget.initial != null)
-              Text(widget.initial!.leadId,
-                  style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                widget.initial!.leadId,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             const SizedBox(height: 16),
             AppTextField(
-                label: 'Name *', controller: _name,
-                validator: (v) => v == null || v.trim().isEmpty ? 'Name is required' : null),
+              label: 'Name *',
+              controller: _name,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Name is required' : null,
+            ),
             AppTextField(
-                label: 'Phone *', controller: _phone,
-                keyboardType: TextInputType.phone,
-                validator: (v) => v == null || v.trim().isEmpty ? 'Phone is required' : null),
+              label: 'Phone *',
+              controller: _phone,
+              keyboardType: TextInputType.phone,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Phone is required' : null,
+            ),
             AppTextField(
-                label: 'Email', controller: _email,
-                keyboardType: TextInputType.emailAddress),
+              label: 'Email',
+              controller: _email,
+              keyboardType: TextInputType.emailAddress,
+            ),
             AppDropdownField<String>(
-                label: 'Source *', value: _source,
-                options: [for (final s in sources) (s, s)],
-                onChanged: (v) => setState(() => _source = v)),
+              label: 'Source *',
+              value: _source,
+              options: [for (final s in sources) (s, s)],
+              onChanged: (v) => setState(() => _source = v),
+            ),
             AppDropdownField<String>(
-                label: 'Status *', value: _status,
-                options: [for (final s in statuses) (s, s)],
-                onChanged: (v) => setState(() => _status = v)),
+              label: 'Status *',
+              value: _status,
+              options: [for (final s in statuses) (s, s)],
+              onChanged: (v) => setState(() => _status = v),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppTextField(
+                  label: 'Budget',
+                  controller: _budget,
+                  hint: 'e.g. 1.5 Cr',
+                ),
+                AmountInWordsHint(controller: _budget),
+              ],
+            ),
+            AppTextField(label: 'Preferred location', controller: _location),
             AppTextField(
-                label: 'Budget', controller: _budget,
-                hint: 'e.g. 1.5 Cr'),
+              label: 'Requirements',
+              controller: _requirements,
+              multiline: true,
+            ),
             AppTextField(
-                label: 'Preferred location', controller: _location),
-            AppTextField(
-                label: 'Requirements', controller: _requirements,
-                multiline: true),
-            AppTextField(
-                label: 'Next follow-up', controller: _followup,
-                hint: 'e.g. 2026-09-05 10:00 AM'),
+              label: 'Next follow-up',
+              controller: _followup,
+              hint: 'e.g. 2026-09-05 10:00 AM',
+            ),
             if (widget.agents.isNotEmpty)
               AppDropdownField<int>(
-                  label: 'Assigned agent', value: _agentId,
-                  options: [for (final a in widget.agents) (a.id, a.name)],
-                  onChanged: (v) => setState(() => _agentId = v)),
+                label: 'Assigned agent',
+                value: _agentId,
+                options: [for (final a in widget.agents) (a.id, a.name)],
+                onChanged: (v) => setState(() => _agentId = v),
+              ),
             const SizedBox(height: 8),
             FilledButton(
               onPressed: _saving ? null : _save,
@@ -185,8 +221,10 @@ class _LeadFormSheetState extends ConsumerState<LeadFormSheet> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: _saving
                     ? const SizedBox(
-                        height: 20, width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2))
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Text('Save'),
               ),
             ),

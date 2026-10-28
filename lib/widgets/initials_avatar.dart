@@ -23,7 +23,7 @@ class InitialsAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: radius,
       backgroundColor: theme.colorScheme.primary,
-      foregroundColor: Colors.white,
+      foregroundColor: theme.colorScheme.onPrimary,
       child: Text(
         avatarText,
         style: TextStyle(

@@ -44,19 +44,23 @@ class _CampaignFormSheetState extends ConsumerState<CampaignFormSheet> {
       widget.onSaved();
       messenger
         ..clearSnackBars()
-        ..showSnackBar(const SnackBar(
-          content: Text('Campaign created.'),
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Campaign created.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       if (mounted) navigator.pop();
     } catch (e) {
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: errorColor,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: errorColor,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -74,22 +78,26 @@ class _CampaignFormSheetState extends ConsumerState<CampaignFormSheet> {
           controller: scrollController,
           padding: const EdgeInsets.all(16),
           children: [
-            Text('New Campaign',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text('New Campaign', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             AppTextField(
               label: 'Campaign Name *',
               controller: _name,
               icon: Icons.campaign_outlined,
-              validator: (v) => v == null || v.trim().isEmpty
-                  ? 'Name is required'
-                  : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Name is required' : null,
             ),
-            AppTextField(
-              label: 'Budget (₹)',
-              controller: _budget,
-              icon: Icons.currency_rupee,
-              keyboardType: TextInputType.number,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppTextField(
+                  label: 'Budget (₹)',
+                  controller: _budget,
+                  icon: Icons.currency_rupee,
+                  keyboardType: TextInputType.number,
+                ),
+                AmountInWordsHint(controller: _budget),
+              ],
             ),
             AppDropdownField<String>(
               label: 'Channel',
@@ -110,7 +118,8 @@ class _CampaignFormSheetState extends ConsumerState<CampaignFormSheet> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2))
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Text('Create Campaign'),
             ),
           ],
