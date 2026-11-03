@@ -129,3 +129,8 @@ class ApiEndpoints {
   // ── Communications ────────────────────────────────────────────────────────
   static const String communications = '/communications';
   static String communication(int id) => '/communications/$id';
+
+
+  // ── WhatsApp ──────────────────────────────────────────────────────────────
+  static const String whatsappStatus = '/whatsapp/status';
+  static const String whatsappSend = '/whatsapp/send';
