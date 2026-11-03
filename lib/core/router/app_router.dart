@@ -142,6 +142,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const ReportsScreen(),
           ),
           GoRoute(
+            path: '/commissions',
+            builder: (context, state) => const CommissionsScreen(),
+          ),
+          GoRoute(
             path: '/cms',
             builder: (context, state) => const CmsScreen(),
           ),
@@ -212,3 +216,6 @@ class _SplashScreen extends StatelessWidget {
     );
   }
 }
+
+
+import '../../features/commissions/presentation/commissions_screen.dart';

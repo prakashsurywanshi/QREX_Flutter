@@ -113,6 +113,13 @@ List<NavDestination> destinationsForUser(User user) {
     module: 'payments',
   );
   add(
+    label: 'Commissions',
+    icon: Icons.monetization_on_outlined,
+    selected: Icons.monetization_on,
+    path: '/commissions',
+    module: 'commissions',
+  );
+  add(
     label: 'Media',
     icon: Icons.photo_library_outlined,
     selected: Icons.photo_library,

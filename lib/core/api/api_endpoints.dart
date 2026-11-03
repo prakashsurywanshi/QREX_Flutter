@@ -102,3 +102,11 @@ class ApiEndpoints {
   static const String notificationsReadAll = '/notifications/read-all';
   static String notificationRead(int id) => '/notifications/$id/read';
 }
+
+  // ── Commissions ───────────────────────────────────────────────────────────
+  static const String commissions = '/commissions';
+  static String commission(int id) => '/commissions/$id';
+  static const String commissionCalculate = '/commissions/calculate';
+  static String commissionApprove(int id) => '/commissions/$id/approve';
+  static String commissionPay(int id) => '/commissions/$id/pay';
+  static String commissionReject(int id) => '/commissions/$id/reject';
