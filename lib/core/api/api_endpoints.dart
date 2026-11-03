@@ -110,3 +110,17 @@ class ApiEndpoints {
   static String commissionApprove(int id) => '/commissions/$id/approve';
   static String commissionPay(int id) => '/commissions/$id/pay';
   static String commissionReject(int id) => '/commissions/$id/reject';
+
+
+  // ── Payment Plans ─────────────────────────────────────────────────────────
+  static const String paymentPlans = '/payment-plans';
+  static String paymentPlan(int id) => '/payment-plans/$id';
+  static String installmentPay(int id) => '/installments/$id/pay';
+
+  // ── Projects & Inventory ──────────────────────────────────────────────────
+  static const String projects = '/projects';
+  static String project(int id) => '/projects/$id';
+  static const String units = '/units';
+  static String unit(int id) => '/units/$id';
+  static String unitHold(int id) => '/units/$id/hold';
+  static String unitRelease(int id) => '/units/$id/release';
