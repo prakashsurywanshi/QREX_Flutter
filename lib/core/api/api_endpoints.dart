@@ -124,3 +124,8 @@ class ApiEndpoints {
   static String unit(int id) => '/units/$id';
   static String unitHold(int id) => '/units/$id/hold';
   static String unitRelease(int id) => '/units/$id/release';
+
+
+  // ── Communications ────────────────────────────────────────────────────────
+  static const String communications = '/communications';
+  static String communication(int id) => '/communications/$id';
