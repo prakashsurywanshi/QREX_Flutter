@@ -142,3 +142,7 @@ class ApiEndpoints {
 
   // ── Device Tokens (FCM) ───────────────────────────────────────────────────
   static const String deviceTokens = '/device-tokens';
+
+
+  // ── Audit Logs ────────────────────────────────────────────────────────────
+  static const String auditLogs = '/audit-logs';
