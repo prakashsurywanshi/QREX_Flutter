@@ -120,6 +120,20 @@ List<NavDestination> destinationsForUser(User user) {
     module: 'commissions',
   );
   add(
+    label: 'Payment Plans',
+    icon: Icons.calendar_month_outlined,
+    selected: Icons.calendar_month,
+    path: '/payment-plans',
+    module: 'payment_plans',
+  );
+  add(
+    label: 'Projects',
+    icon: Icons.apartment_outlined,
+    selected: Icons.apartment,
+    path: '/projects',
+    module: 'projects',
+  );
+  add(
     label: 'Media',
     icon: Icons.photo_library_outlined,
     selected: Icons.photo_library,
