@@ -138,3 +138,7 @@ class ApiEndpoints {
 
   // ── Branding ──────────────────────────────────────────────────────────────
   static const String branding = '/branding';
+
+
+  // ── Device Tokens (FCM) ───────────────────────────────────────────────────
+  static const String deviceTokens = '/device-tokens';
