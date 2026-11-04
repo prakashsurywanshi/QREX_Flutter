@@ -144,6 +144,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/commissions',
             builder: (context, state) => const CommissionsScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                builder: (context, state) {
+                  final id = int.tryParse(state.pathParameters['id'] ?? '0') ?? 0;
+                  return CommissionDetailScreen(id: id);
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: '/payment-plans',
@@ -227,5 +236,6 @@ class _SplashScreen extends StatelessWidget {
 
 
 import '../../features/commissions/presentation/commissions_screen.dart';
+import '../../features/commissions/presentation/commission_detail_screen.dart';
 import '../../features/payment_plans/presentation/payment_plans_screen.dart';
 import '../../features/projects/presentation/projects_screen.dart';
