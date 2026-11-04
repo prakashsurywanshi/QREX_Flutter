@@ -134,3 +134,7 @@ class ApiEndpoints {
   // ── WhatsApp ──────────────────────────────────────────────────────────────
   static const String whatsappStatus = '/whatsapp/status';
   static const String whatsappSend = '/whatsapp/send';
+
+
+  // ── Branding ──────────────────────────────────────────────────────────────
+  static const String branding = '/branding';
