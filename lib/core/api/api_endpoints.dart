@@ -101,7 +101,6 @@ class ApiEndpoints {
   static const String notifications = '/notifications';
   static const String notificationsReadAll = '/notifications/read-all';
   static String notificationRead(int id) => '/notifications/$id/read';
-}
 
   // ── Commissions ───────────────────────────────────────────────────────────
   static const String commissions = '/commissions';
@@ -110,7 +109,6 @@ class ApiEndpoints {
   static String commissionApprove(int id) => '/commissions/$id/approve';
   static String commissionPay(int id) => '/commissions/$id/pay';
   static String commissionReject(int id) => '/commissions/$id/reject';
-
 
   // ── Payment Plans ─────────────────────────────────────────────────────────
   static const String paymentPlans = '/payment-plans';
@@ -125,24 +123,20 @@ class ApiEndpoints {
   static String unitHold(int id) => '/units/$id/hold';
   static String unitRelease(int id) => '/units/$id/release';
 
-
   // ── Communications ────────────────────────────────────────────────────────
   static const String communications = '/communications';
   static String communication(int id) => '/communications/$id';
-
 
   // ── WhatsApp ──────────────────────────────────────────────────────────────
   static const String whatsappStatus = '/whatsapp/status';
   static const String whatsappSend = '/whatsapp/send';
 
-
   // ── Branding ──────────────────────────────────────────────────────────────
   static const String branding = '/branding';
-
 
   // ── Device Tokens (FCM) ───────────────────────────────────────────────────
   static const String deviceTokens = '/device-tokens';
 
-
   // ── Audit Logs ────────────────────────────────────────────────────────────
   static const String auditLogs = '/audit-logs';
+}

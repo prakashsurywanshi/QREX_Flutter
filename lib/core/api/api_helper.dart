@@ -3,6 +3,13 @@ import 'package:dio/dio.dart';
 import 'api_exception.dart';
 
 /// Parses any thrown value into a user-friendly [ApiException].
+dynamic unwrapData(dynamic responseData) {
+  if (responseData is Map && responseData.containsKey('data')) {
+    return responseData['data'];
+  }
+  return responseData;
+}
+
 class ApiHelper {
   ApiHelper._();
 
